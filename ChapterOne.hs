@@ -2,5 +2,6 @@ module Main where
 import           System.Environment
 
 main::IO()
-main = do args<-getArgs
-          putStrLn ("Hello, " ++ head args)
+main = do putStrLn "What is your name"
+          args<-getLine
+          putStrLn ("Hello, " ++ args)
