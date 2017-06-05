@@ -3,8 +3,8 @@ import           System.Environment
 import           Text.ParserCombinators.Parsec hiding (spaces)
 import           Control.Monad
 
-symbol::Parser Char
-symbol =oneOf "!$%&|*+-/:<=?>@^_~#"
+symbol :: Parser Char
+symbol = oneOf "!$%&|*+-/:<=?>@^_~#"
 
 data LispVal
   = Atom String
@@ -15,13 +15,13 @@ data LispVal
   | String String
   | Bool Bool
 
-readExpr::String -> String
+readExpr :: String -> String
 readExpr input =
   case parse parseExpr "lisp" input of
     Left err  -> "No match: " ++ show err
     Right val -> "Found value"
 
-spaces::Parser()
+spaces :: Parser ()
 spaces = skipMany1 space
 
 
@@ -32,7 +32,7 @@ parseString = do
   char '"'
   return $ String x
 
-parseAtom::Parser LispVal
+parseAtom :: Parser LispVal
 parseAtom = do
   first <- letter <|> symbol
   rest <- many (letter <|> digit <|> symbol)
@@ -47,10 +47,27 @@ parseNumber :: Parser LispVal
 parseNumber = fmap (Number . read) $ many1 digit
 
 parseExpr :: Parser LispVal
-parseExpr = parseAtom <|> parseNumber <|> parseString
+parseExpr =
+  parseAtom <|> parseNumber <|> parseString <|> parseQuoted <|> do
+    char '('
+    x <- (try parseList) <|> parseDottedList
+    char ')'
+    return x
 
 parseList :: Parser LispVal
 parseList=liftM List $ sepBy parseExpr spaces
+
+parseDottedList :: Parser LispVal
+parseDottedList = do
+  head <- endBy parseExpr spaces
+  tail <- char '.' >> spaces >> parseExpr
+  return $ DottedList head tail
+
+parseQuoted :: Parser LispVal
+parseQuoted = do
+  char '\''
+  x <- parseExpr
+  return $ List [Atom "quote", x]
 
 
 main::IO()
