@@ -207,6 +207,9 @@ trapError action = catchError action (return . show)
 extractValue :: ThrowsError a -> a
 extractValue (Right val) = val
 
+car::[LispVal] -> ThrowsError LispVal
+car [List (x:xs)]=return x
+
 main :: IO ()
 main = do
   args <- getArgs
