@@ -1,2 +1,5 @@
-{-# LANGUAGE OverloadedStrings #-}
-import Data.Text as T
+module Main where
+
+main :: IO ()
+main = do
+  putStrLn "hello world"
